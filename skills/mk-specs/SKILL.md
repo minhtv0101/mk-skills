@@ -4,7 +4,7 @@ description: Spec-Driven Development (SDD) for repos with a specs/ folder - busi
 license: MIT
 metadata:
   author: minhtv0101
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # mk-specs — Spec-Driven Development
@@ -16,7 +16,7 @@ Spec đứng giữa người và AI: người chốt *ý định* trong `specs/`
 ## Bước 0 — mỗi lần kích hoạt
 
 1. Đọc `specs/mk-specs.yml` ở gốc repo. Không có → hỏi người dùng có muốn chạy mode `init` không; chưa đồng ý thì chỉ trả lời câu hỏi, không tạo file.
-2. Đọc mục SDD trong CLAUDE.md/AGENTS.md của project: luật riêng (lệnh DoD, migration, người duyệt) **thắng** mặc định của skill khi mâu thuẫn.
+2. Đọc `AGENTS.md` (và `CLAUDE.md` nếu có luật riêng): luật riêng của repo (lệnh DoD, migration, người duyệt) **thắng** mặc định của skill khi mâu thuẫn. Thiếu khối `<!-- mk-specs:start -->` trong `AGENTS.md` → gợi ý chạy `install.sh --project .` (thêm khối, không đụng phần khác).
 3. Kiểm phiên bản (bản project được dùng cho scripts):
    ```bash
    grep -m1 -H 'version:' .claude/skills/mk-specs/SKILL.md ~/.claude/skills/mk-specs/SKILL.md ~/.agents/skills/mk-specs/SKILL.md 2>/dev/null

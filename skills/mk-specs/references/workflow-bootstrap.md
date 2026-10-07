@@ -2,11 +2,11 @@
 
 ## 1. Cài đặt chung cho mọi project
 
-1. Cài skill vào project: `bash <mk-skills>/install.sh --project <repo>` — chép skill vào `<repo>/.claude/skills/mk-specs` và tạo `<repo>/specs/mk-specs.yml` từ mẫu nếu chưa có.
+1. Cài skill vào project: `bash <mk-skills>/install.sh --project <repo>` (đứng trong repo: `--project .`; chạy lại bao nhiêu lần cũng được — thiếu thì thêm, có rồi thì giữ hoặc cập nhật). Lệnh chép skill vào `<repo>/.claude/skills/mk-specs`, tạo `<repo>/specs/mk-specs.yml` từ mẫu nếu chưa có, ghi khối `mk-specs` vào `AGENTS.md` (file chung mọi agent đọc), thêm `@AGENTS.md` vào `CLAUDE.md`, và một dòng trỏ `AGENTS.md` vào `GEMINI.md` nếu file đó có. Agent đọc `.agents/skills` (vd Codex) → thêm `--agents-dir`.
 2. Sửa `specs/mk-specs.yml`: `contexts`, `ids`, `tests.list_command`, `tests.citation_style` (project mới: cân nhắc `name` hoặc `both`), `metrics.since` = ngày áp dụng.
 3. Tạo khung từ `assets/templates/`: `specs/README.md` (`specs-readme.md`), `business-requirements.md`, `decisions.md` (tiêu đề + bảng mục lục rỗng), `changes/README.md` (một đoạn trỏ tới `.claude/skills/mk-specs/assets/templates/proposal.md`), `changes/archive/`, mỗi context một thư mục với `README.md` + `entities.md`.
 4. Thêm lệnh `specs:gen` / `specs:check` (traceability.md §3).
-5. Ghi vào CLAUDE.md / AGENTS.md của project một mục ngắn: "SDD theo skill `mk-specs` (`.claude/skills/mk-specs`, cấu hình `specs/mk-specs.yml`)" + **chỉ** luật riêng của repo (lệnh DoD, quy định migration/schema, cách xem giao diện, người duyệt). Luật chung đã nằm trong skill — không chép lại.
+5. Luật riêng của repo (lệnh DoD, quy định migration/schema, cách xem giao diện, người duyệt) viết vào `AGENTS.md`, **ngoài** khối `mk-specs` (khối đó do `install.sh` quản lý, sửa tay sẽ bị ghi đè). `CLAUDE.md` chỉ giữ `@AGENTS.md` + điều riêng cho Claude nếu có. Luật chung đã nằm trong skill — không chép lại.
 6. Chạy gen.py + verify.py; commit `chore(specs): adopt mk-specs`.
 
 Rồi chọn nhánh greenfield (§2) hoặc brownfield (§3).

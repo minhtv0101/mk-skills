@@ -187,6 +187,51 @@ class Scripts(unittest.TestCase):
         self.assertIn("- feat(UC-999): unknown id", res.stdout)
         self.assertEqual(before, self.read("specs/checkout/UC-101-dat-hang.md"))
 
+class AgentFiles(unittest.TestCase):
+    def setUp(self):
+        self.root = tempfile.mkdtemp()
+
+    def read(self, name):
+        with open(os.path.join(self.root, name), encoding="utf-8") as fh:
+            return fh.read()
+
+    def run_files(self, *extra):
+        res = subprocess.run([sys.executable, os.path.join(SCRIPTS, "agent-files.py"), self.root, *extra], capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, res.stderr)
+        return res.stdout
+
+    def test_fresh_project_gets_agents_block_and_claude_import_once(self):
+        out = self.run_files()
+        self.assertIn("AGENTS.md (created)", out)
+        self.assertIn("@AGENTS.md created", out)
+        agents = self.read("AGENTS.md")
+        self.assertEqual(agents.count("<!-- mk-specs:start"), 1)
+        self.assertEqual(self.read("CLAUDE.md"), "@AGENTS.md\n")
+        again = self.run_files()
+        self.assertIn("AGENTS.md (unchanged)", again)
+        self.assertIn("@AGENTS.md unchanged", again)
+        self.assertEqual(agents, self.read("AGENTS.md"))
+
+    def test_existing_files_keep_own_rules_and_stale_block_is_replaced(self):
+        with open(os.path.join(self.root, "AGENTS.md"), "w", encoding="utf-8") as fh:
+            fh.write("# Luật repo\n\nGiữ nguyên dòng này.\n\n<!-- mk-specs:start v0.1 -->\ncũ\n<!-- mk-specs:end -->\n\n## Sau khối\nCũng giữ.\n")
+        with open(os.path.join(self.root, "CLAUDE.md"), "w", encoding="utf-8") as fh:
+            fh.write("# Claude riêng\n")
+        with open(os.path.join(self.root, "GEMINI.md"), "w", encoding="utf-8") as fh:
+            fh.write("# Gemini\n")
+        out = self.run_files()
+        self.assertIn("AGENTS.md (updated)", out)
+        agents = self.read("AGENTS.md")
+        self.assertIn("Giữ nguyên dòng này.", agents)
+        self.assertIn("## Sau khối\nCũng giữ.", agents)
+        self.assertNotIn("\ncũ\n", agents)
+        self.assertEqual(self.read("CLAUDE.md"), "@AGENTS.md\n\n# Claude riêng\n")
+        self.assertIn("AGENTS.md", self.read("GEMINI.md"))
+        self.run_files("--uninstall")
+        self.assertNotIn("mk-specs:start", self.read("AGENTS.md"))
+        self.assertIn("Giữ nguyên dòng này.", self.read("AGENTS.md"))
+
+
 
 if __name__ == "__main__":
     unittest.main()

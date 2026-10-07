@@ -1,26 +1,31 @@
 #!/usr/bin/env bash
-# Install the mk-specs skill (copies, never symlinks).
+# Install the mk-specs skill (copies, never symlinks). Safe to re-run: missing pieces are added, existing ones kept or updated.
 #   --global          → ~/.claude/skills/mk-specs and ~/.agents/skills/mk-specs
-#   --project <dir>   → <dir>/.claude/skills/mk-specs, and <dir>/specs/mk-specs.yml from the template if missing
+#   --project <dir>   → <dir>/.claude/skills/mk-specs, <dir>/specs/mk-specs.yml (template, only if missing),
+#                       mk-specs block in <dir>/AGENTS.md, `@AGENTS.md` in CLAUDE.md, a pointer line in GEMINI.md if present
+#   --agents-dir      → with --project: also copy to <dir>/.agents/skills/mk-specs (agents that read .agents/skills, e.g. Codex)
+#   --no-agent-files  → with --project: don't touch AGENTS.md / CLAUDE.md / GEMINI.md
 #   --force           → overwrite a project copy that has local edits
-#   --uninstall       → remove instead of install (with --global and/or --project; the project config is kept)
-# Flags combine: install.sh --global --project ~/code/shop
+#   --uninstall       → remove instead of install (with --global and/or --project; config and import lines are kept)
+# Flags combine: install.sh --global --project .
 set -euo pipefail
 
 SKILL=mk-specs
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/skills/$SKILL"
 MANIFEST=.mk-specs-manifest
 
-usage() { sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
+usage() { sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
 die() { echo "install.sh: $*" >&2; exit 1; }
 
-GLOBAL=0 FORCE=0 UNINSTALL=0 PROJECTS=()
+GLOBAL=0 FORCE=0 UNINSTALL=0 AGENTS_DIR=0 AGENT_FILES=1 PROJECTS=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --global) GLOBAL=1 ;;
     --project) [ $# -ge 2 ] || die "--project needs a directory"; PROJECTS+=("$2"); shift ;;
     --project=*) PROJECTS+=("${1#--project=}") ;;
     --force) FORCE=1 ;;
+    --agents-dir) AGENTS_DIR=1 ;;
+    --no-agent-files) AGENT_FILES=0 ;;
     --uninstall) UNINSTALL=1 ;;
     -h|--help) usage 0 ;;
     *) echo "install.sh: unknown option: $1" >&2; usage 1 ;;
@@ -48,16 +53,21 @@ copy_skill() {
   mv "$tmp" "$dest"
 }
 
-# Local edits = tracked files modified in git, or (untracked / no git) files differing from the install manifest.
+# Local edits = files that differ from what install.sh last wrote (the manifest). A copy that still matches the
+# manifest is safe to replace even if not committed yet (e.g. re-running right after an update). Without a
+# manifest, fall back to git: tracked files modified, or any untracked file in the skill folder.
 has_local_edits() {
   local proj="$1" dest="$2" rel=".claude/skills/$SKILL"
   [ -d "$dest" ] || return 1
-  if git -C "$proj" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    [ -n "$(git -C "$proj" status --porcelain --untracked-files=no -- "$rel")" ] && return 0
-    [ -z "$(git -C "$proj" status --porcelain --untracked-files=all -- "$rel")" ] && return 1
+  if [ -f "$dest/$MANIFEST" ]; then
+    [ "$(manifest_of "$dest")" != "$(cat "$dest/$MANIFEST")" ]
+    return
   fi
-  [ -f "$dest/$MANIFEST" ] || return 0
-  [ "$(manifest_of "$dest")" != "$(cat "$dest/$MANIFEST")" ]
+  if git -C "$proj" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    [ -n "$(git -C "$proj" status --porcelain --untracked-files=all -- "$rel")" ]
+    return
+  fi
+  return 0
 }
 
 installed_version() {
@@ -88,6 +98,8 @@ for proj in ${PROJECTS[@]+"${PROJECTS[@]}"}; do
       die "$dest has local edits; commit them or pass --force"
     fi
     rm -rf "$dest" && echo "removed $dest (kept specs/mk-specs.yml)"
+    if [ -d "$proj/.agents/skills/$SKILL" ]; then rm -rf "$proj/.agents/skills/$SKILL" && echo "removed $proj/.agents/skills/$SKILL"; fi
+    if [ "$AGENT_FILES" = 1 ]; then python3 "$SRC/scripts/agent-files.py" "$proj" --uninstall; fi
     continue
   fi
   if has_local_edits "$proj" "$dest" && [ "$FORCE" != 1 ]; then
@@ -104,4 +116,9 @@ for proj in ${PROJECTS[@]+"${PROJECTS[@]}"}; do
     cp "$SRC/assets/mk-specs.yml.template" "$cfg"
     echo "config: $cfg (created from template — edit contexts, ids, tests, metrics.since)"
   fi
+  if [ "$AGENTS_DIR" = 1 ]; then
+    copy_skill "$proj/.agents/skills/$SKILL"
+    echo "project: $proj/.agents/skills/$SKILL ($VERSION)"
+  fi
+  if [ "$AGENT_FILES" = 1 ]; then python3 "$SRC/scripts/agent-files.py" "$proj"; fi
 done

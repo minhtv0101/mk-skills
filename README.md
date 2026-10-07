@@ -22,7 +22,7 @@ Khi AI viết phần lớn code, điều gì không được viết ra thì vớ
 ## Yêu cầu
 
 - `bash` (macOS hoặc Linux), `python3` ≥ 3.8, `git`.
-- Một agent đọc skill: Claude Code (`~/.claude/skills`, `<repo>/.claude/skills`), omp hoặc agent khác đọc `~/.agents/skills` / `.claude/skills`.
+- Một coding agent bất kỳ. Agent có hỗ trợ skill (Claude Code, omp, Codex…) tự kích hoạt `mk-specs`; agent khác đọc `AGENTS.md` và được trỏ tới `SKILL.md` (markdown thường).
 
 ## Cài đặt
 
@@ -31,12 +31,35 @@ git clone https://github.com/minhtv0101/mk-skills.git
 cd mk-skills
 
 ./install.sh --global                      # ~/.claude/skills/mk-specs và ~/.agents/skills/mk-specs
-./install.sh --project ~/code/my-shop      # <repo>/.claude/skills/mk-specs + tạo specs/mk-specs.yml nếu chưa có
+./install.sh --project ~/code/my-shop      # cài vào một project
 ./install.sh --global --project ~/code/my-shop   # cả hai
 ```
 
+Đang đứng trong project:
+
+```bash
+cd ~/code/my-shop
+bash ~/mk-skills/install.sh --project .    # đường dẫn tới nơi đã clone mk-skills
+```
+
+`--project` làm gì (chạy lại bao nhiêu lần cũng được — **thiếu thì thêm, có rồi thì giữ hoặc cập nhật**):
+
+| File | Lần đầu | Lần sau |
+|---|---|---|
+| `.claude/skills/mk-specs/` | chép skill | thay bằng bản mới (từ chối nếu có sửa tay chưa commit, trừ `--force`) |
+| `specs/mk-specs.yml` | tạo từ mẫu | giữ nguyên |
+| `AGENTS.md` | tạo, kèm khối `<!-- mk-specs:start … end -->` | chỉ thay phần trong khối khi khối đổi; phần còn lại của file không bị đụng |
+| `CLAUDE.md` | tạo với dòng `@AGENTS.md` (hoặc thêm dòng đó lên đầu file có sẵn) | giữ nguyên |
+| `GEMINI.md` | chỉ khi file đã có: thêm một dòng "Đọc và làm theo `AGENTS.md`" | giữ nguyên |
+| `.agents/skills/mk-specs/` | chỉ với `--agents-dir` (agent đọc `.agents/skills`, vd Codex) | thay bằng bản mới |
+
+Không muốn đụng file hướng dẫn agent: thêm `--no-agent-files`.
+
+### Dùng với nhiều agent
+
+`AGENTS.md` là [định dạng mở](https://agents.md) mà phần lớn agent đọc (Codex, Cursor, Copilot, Windsurf, Aider, omp…; Gemini CLI/Antigravity khi cấu hình hoặc qua `GEMINI.md`). Claude Code đọc `CLAUDE.md` nên cần dòng `@AGENTS.md`. Khối `mk-specs` trong `AGENTS.md` ghi các cổng cứng và trỏ tới `.claude/skills/mk-specs/SKILL.md`, nên agent không hỗ trợ skill vẫn làm đúng quy trình. Luật riêng của repo viết trong `AGENTS.md`, ngoài khối.
+
 - Luôn **chép**, không symlink — bản trong project được commit cùng repo, nên mọi người (và CI) chạy cùng một phiên bản scripts.
-- Bản project có sửa tay chưa commit → `install.sh` từ chối ghi đè; commit/bỏ thay đổi trước, hoặc thêm `--force`.
 - Script in phiên bản cũ → mới sau mỗi lần cài.
 
 Khi project dùng `npm`, thêm vào `package.json`:
@@ -59,7 +82,7 @@ Rồi trong project: chạy `specs:gen` — `traceability.md`/`open-issues.md` p
 
 ```bash
 ./install.sh --uninstall --global
-./install.sh --uninstall --project ~/code/my-shop   # giữ lại specs/ và specs/mk-specs.yml
+./install.sh --uninstall --project ~/code/my-shop   # bỏ khối mk-specs trong AGENTS.md; giữ specs/, specs/mk-specs.yml và dòng @AGENTS.md
 ```
 
 ## Cấu hình `specs/mk-specs.yml`
@@ -147,6 +170,6 @@ MIT — xem [LICENSE](LICENSE).
 
 **mk-specs** is an agent skill for Spec-Driven Development. Humans agree on intent in `specs/` (business requirements, use cases, entities, acceptance criteria, ADRs); the AI writes tests and code from the spec; when something is wrong, fix the spec first. It ships workflows (init, change, apply, merge, check, commit, audit), templates, and stdlib-only Python scripts that generate a UC ↔ AC ↔ test traceability matrix and an open-issues list, verify every cited test exists and every relative link resolves, and report AC Coverage, Spec Coverage and Trace Ratio.
 
-Install with `./install.sh --global` (copies to `~/.claude/skills` and `~/.agents/skills`) and/or `./install.sh --project <repo>` (copies to `<repo>/.claude/skills` and creates `specs/mk-specs.yml`). Requirements: bash, python3 ≥ 3.8, git. Skill text is Vietnamese; generated files support `language: vi | en`.
+Install with `./install.sh --global` (copies to `~/.claude/skills` and `~/.agents/skills`) and/or `./install.sh --project <repo>` (from inside a repo: `--project .`; idempotent — copies to `<repo>/.claude/skills`, creates `specs/mk-specs.yml` if missing, maintains a marked mk-specs block in `AGENTS.md` (the cross-agent standard) and adds `@AGENTS.md` to `CLAUDE.md`, so agents without skill support still follow the workflow; `--agents-dir` also copies to `.agents/skills`). Requirements: bash, python3 ≥ 3.8, git. Skill text is Vietnamese; generated files support `language: vi | en`.
 
 Credits: the method follows the ebook *Spec Driven Development* by Huy (huynt.dev), which builds on AI Unified Process (Simon Martinelli), GitHub Spec Kit, OpenSpec, DDD and Hexagonal Architecture. License: MIT.
