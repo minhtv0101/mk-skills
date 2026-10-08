@@ -4,6 +4,7 @@ Repo này làm theo SDD. Trước khi đổi bất kỳ hành vi nào (tính nă
 
 Cổng cứng (áp dụng cả khi chưa mở skill):
 - Không có AC thì không code; spec không nói thì hỏi, không đoán — sửa spec trước rồi mới sửa code.
+- Yêu cầu mơ hồ hoặc nhiều cách hiểu → hỏi lại trước khi viết spec; chỉ viết điều được yêu cầu, không thêm UC/AC "phòng khi". Viết xong spec → tự soát theo `.claude/skills/mk-specs/references/review.md` trước khi đưa người duyệt.
 - Luật tiền, quyền truy cập, bảo mật: người quyết, AI chỉ đề xuất.
 - Không tự duyệt spec của chính mình.
 - Commit mang ID: `<type>(UC-xxx): …`; spec commit trước code.

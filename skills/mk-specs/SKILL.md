@@ -1,22 +1,22 @@
 ---
 name: mk-specs
-description: Spec-Driven Development (SDD) for repos with a specs/ folder - business requirements (BR), use cases (UC), acceptance criteria (AC), ADR, change proposals, generated traceability. Use this skill whenever the user wants to add or change behaviour, write or update a spec, UC, AC, BR, entity or ADR, propose a change, implement an approved proposal, merge a change into specs, regenerate traceability.md or open-issues.md, check spec-to-test links, write a commit message carrying a UC ID, audit spec quality, or bootstrap specs for a new or existing codebase. Trigger also on Vietnamese requests such as "đặc tả", "viết spec", "đề xuất thay đổi", "proposal", "thêm AC", "use case", "làm tính năng mới", "đổi luật", "hợp nhất change", "sinh lại traceability", "kiểm spec", "commit theo UC", and whenever a repo contains specs/mk-specs.yml.
+description: Spec-Driven Development (SDD) for repos with a specs/ folder - business requirements (BR), use cases (UC), acceptance criteria (AC), ADR, change proposals, generated traceability. Use this skill whenever the user wants to add or change behaviour, write or update a spec, UC, AC, BR, entity or ADR, propose a change, self-review a freshly written spec or proposal for contradictions and gaps, implement an approved proposal, merge a change into specs, regenerate traceability.md or open-issues.md, check spec-to-test links, write a commit message carrying a UC ID, audit spec quality, or bootstrap specs for a new or existing codebase. Trigger also on Vietnamese requests such as "đặc tả", "viết spec", "đề xuất thay đổi", "proposal", "thêm AC", "use case", "làm tính năng mới", "đổi luật", "soát spec", "review proposal", "hợp nhất change", "sinh lại traceability", "kiểm spec", "commit theo UC", and whenever a repo contains specs/mk-specs.yml.
 license: MIT
 metadata:
   author: minhtv0101
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # mk-specs — Spec-Driven Development
 
-Spec đứng giữa người và AI: người chốt *ý định* trong `specs/`, AI viết test và code theo spec; sai thì sửa spec trước. Phương pháp dựa trên ebook *Spec Driven Development* của anh Huy (huynt.dev) — tri ân anh; chi tiết nguồn ở `references/principles.md`.
+Spec đứng giữa người và AI: người chốt *ý định* trong `specs/`, AI viết test và code theo spec; sai thì sửa spec trước. Phương pháp dựa trên ebook *Spec Driven Development* của anh Huy (huynt.dev); chi tiết nguồn ở `references/principles.md`.
 
-**Phạm vi.** Skill này xử lý: BR/UC/Entity/AC/ADR, đề xuất thay đổi (change folder), vòng đời propose → apply → merge, commit có ID, sinh và kiểm `traceability.md`/`open-issues.md`, chỉ số, audit, khởi tạo specs cho repo mới hoặc đang chạy. **Không** xử lý: deploy, chạy production, chọn giải pháp nghiệp vụ thay chủ sản phẩm, viết tài liệu marketing, quản lý ticket/PR trên nền tảng git.
+**Phạm vi.** Skill này xử lý: BR/UC/Entity/AC/ADR, đề xuất thay đổi (change folder), tự soát spec vừa viết, vòng đời propose → apply → merge, commit có ID, sinh và kiểm `traceability.md`/`open-issues.md`, chỉ số, audit, khởi tạo specs cho repo mới hoặc đang chạy. **Không** xử lý: deploy, chạy production, chọn giải pháp nghiệp vụ thay chủ sản phẩm, viết tài liệu marketing, quản lý ticket/PR trên nền tảng git.
 
 ## Bước 0 — mỗi lần kích hoạt
 
 1. Đọc `specs/mk-specs.yml` ở gốc repo. Không có → hỏi người dùng có muốn chạy mode `init` không; chưa đồng ý thì chỉ trả lời câu hỏi, không tạo file.
-2. Đọc `AGENTS.md` (và `CLAUDE.md` nếu có luật riêng): luật riêng của repo (lệnh DoD, migration, người duyệt) **thắng** mặc định của skill khi mâu thuẫn. Thiếu khối `<!-- mk-specs:start -->` trong `AGENTS.md` → gợi ý chạy `install.sh --project .` (thêm khối, không đụng phần khác).
+2. Đọc `AGENTS.md` (và `CLAUDE.md` nếu có luật riêng): luật riêng của repo (lệnh DoD, migration, người duyệt) **thắng** mặc định của skill khi mâu thuẫn. Thiếu khối `<!-- mk-specs:start -->` trong `AGENTS.md` → gợi ý chạy `install.sh --project .`, hoặc khi chỉ có thư mục skill: `python3 <skill>/scripts/agent-files.py .` (thêm khối, không đụng phần khác). `<skill>` = thư mục chứa file `SKILL.md` này.
 3. Kiểm phiên bản (bản project được dùng cho scripts):
    ```bash
    grep -m1 -H 'version:' .claude/skills/mk-specs/SKILL.md ~/.claude/skills/mk-specs/SKILL.md ~/.agents/skills/mk-specs/SKILL.md 2>/dev/null
@@ -28,8 +28,9 @@ Spec đứng giữa người và AI: người chốt *ý định* trong `specs/`
 
 | Mode | Khi người dùng… | Đọc | Kết quả |
 |---|---|---|---|
-| `init` | bắt đầu SDD cho repo mới hoặc repo đang chạy | `references/workflow-bootstrap.md`, `references/artifacts.md` | `specs/` khung, config, CLAUDE.md trỏ về skill, BR/UC đầu tiên hoặc baseline brownfield |
-| `change` | muốn tính năng mới, đổi luật, đổi API/giao diện | `references/workflow-change.md` §1–2, `references/artifacts.md` | `specs/changes/<yyMMdd>-<slug>/proposal.md` đã review hai phía; commit 1 |
+| `init` | bắt đầu SDD cho repo mới hoặc repo đang chạy | `references/workflow-bootstrap.md`, `references/artifacts.md` | `specs/` khung, config, CLAUDE.md trỏ về skill, BR/UC đầu tiên hoặc baseline brownfield, đã tự soát |
+| `change` | muốn tính năng mới, đổi luật, đổi API/giao diện | `references/workflow-change.md` §1–2, `references/artifacts.md` | `specs/changes/<yyMMdd>-<slug>/proposal.md` đã tự soát và review hai phía; commit 1 |
+| `review` | vừa viết xong spec/proposal (tự chạy), hoặc người dùng nhờ soát lại | `references/review.md` | lỗi của agent đã tự sửa, câu hỏi cho người dùng đã trả lời hoặc thành `[OPEN]`, mục `## Tự soát` trong proposal |
 | `apply` | yêu cầu làm theo proposal đã duyệt | `references/workflow-change.md` §3 | test theo AC (đỏ → xanh), code; commit 2 |
 | `merge` | code xong, cần hợp nhất vào spec | `references/workflow-change.md` §4, `references/traceability.md` §3 | UC/ADR/History cập nhật, change vào archive, file sinh mới; commit 3 |
 | `check` | hỏi spec có khớp test/link không, số liệu, chỉ số | `references/traceability.md` | kết quả gen.py + verify.py, giải thích lỗi |
@@ -37,6 +38,17 @@ Spec đứng giữa người và AI: người chốt *ý định* trong `specs/`
 | `audit` | muốn soát chất lượng spec, quy trình | `references/anti-patterns.md`, `references/principles.md` | báo cáo audit.py + danh sách việc ưu tiên; không sửa hàng loạt |
 
 Sửa lỗi nhỏ không đổi AC: dùng đường tắt ở `references/workflow-change.md` §6, không cần change folder. Yêu cầu mơ hồ ("làm cho tốt hơn") → hỏi lại kết quả mong muốn trước khi chọn mode.
+
+## Kỷ luật khi viết spec
+
+Rút từ [Karpathy guidelines](https://github.com/multica-ai/andrej-karpathy-skills) (MIT), áp cho spec; mode `apply` áp y như vậy cho code.
+
+1. **Hỏi trước khi viết.** Nói rõ giả định. Yêu cầu có nhiều cách hiểu → liệt kê, hỏi; không âm thầm chọn. Chưa hiểu người dùng muốn gì → dừng, nêu chỗ chưa rõ, hỏi. Chỉ hỏi điều repo/spec/code không trả lời được.
+2. **Tối thiểu.** Chỉ viết UC/AC/entity/ADR mà yêu cầu cần. Không AC "phòng khi", không cấu hình hoá hay "để sau mở rộng" khi không ai yêu cầu, không exception cho tình huống không xảy ra được; ý tưởng ngoài yêu cầu → một dòng Out of Scope hoặc nhắc người dùng. Spec dài gấp đôi mức cần → cắt.
+3. **Sửa đúng chỗ.** Chỉ đụng UC/AC/flow mà thay đổi cần; không viết lại câu chữ, đổi định dạng hay "dọn" phần lân cận. Thấy lỗi khác → báo hoặc ghi `[OPEN]`, không tự sửa. Mỗi dòng đổi trong spec truy được về yêu cầu.
+4. **Đích kiểm được.** Mỗi điều người dùng muốn thành AC có Given/When/Then đo được; điều chưa viết được thành AC là điều chưa hiểu → quay lại bước 1.
+
+Viết xong spec/proposal → chạy mode `review` trước khi đưa người duyệt.
 
 ## Cổng cứng (không bỏ qua, kể cả khi được giục)
 
@@ -50,7 +62,7 @@ Sửa lỗi nhỏ không đổi AC: dùng đường tắt ở `references/workfl
 
 ## Scripts
 
-Chạy từ gốc repo, dùng bản trong project (`.claude/skills/mk-specs/scripts/`). Chỉ cần `python3` (thư viện chuẩn) và `git`.
+Chạy từ gốc repo, dùng bản trong project (`.claude/skills/mk-specs/scripts/`). Chỉ cần `python3` (thư viện chuẩn) và `git`; không phụ thuộc skill, MCP hay công cụ riêng của agent nào. Repo chưa có bản project (mới cài chung) → chạy `<skill>/scripts/…` thay đường dẫn trong bảng, và gợi ý cài vào project để mọi người dùng cùng phiên bản.
 
 | Lệnh | Việc |
 |---|---|

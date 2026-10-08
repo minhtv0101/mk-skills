@@ -3,7 +3,7 @@
 Áp dụng cho: tính năng mới, đổi luật (nhất là tiền), đổi API, đổi điều người dùng thấy. Sửa nhỏ giữ nguyên AC: xem §6.
 
 ```
-change ──► review hai phía ──► commit 1 (propose) ──► apply: test đỏ → code → xanh ──► commit 2 (code)
+change ──► tự soát ──► review hai phía ──► commit 1 (propose) ──► apply: test đỏ → code → xanh ──► commit 2 (code)
        ──► merge: UC/ADR/History/archive/gen/check ──► commit 3 (merge)
 ```
 
@@ -19,11 +19,12 @@ change ──► review hai phía ──► commit 1 (propose) ──► apply: 
    - **Thiết kế**: file/symbol, migration (ghi rõ sao lưu dữ liệu thật trước), rủi ro, phần nào AI làm / phần nào người quyết.
 4. Không AC thì không code. AC phải test được; không test được thì viết lại AC.
 5. Proposal dài quá một màn hình đọc của người duyệt nghiệp vụ → tách thay đổi, hoặc dồn chi tiết kỹ thuật xuống "Thiết kế".
+6. Tự soát (`references/review.md`): sửa lỗi của chính mình, hỏi người dùng các điểm cần quyết, điền `## Tự soát`. Chỉ sau đó mới đưa review hai phía.
 
 ## 2. Review hai phía
 
 - **Nghiệp vụ** — chủ sản phẩm (hoặc người chịu hậu quả) đọc Vì sao + Thay đổi spec: đúng rule không, thiếu case "đương nhiên" nào không (tr.28–29, 53). Ghi tên + ngày + kênh vào `Người duyệt nghiệp vụ`.
-- **Kỹ thuật** — một reviewer khác người viết: người, hoặc reviewer agent (skill code review, subagent `reviewer` của agent đang dùng, …) được giao đọc proposal + code hiện có, hỏi: khả thi không, đúng context không, AC test được không, exception thiếu không, migration an toàn không, có rule nào lẻn vào code mà spec không nói không. Ghi kết luận vào `## Review kỹ thuật` và tên + ngày vào `Người duyệt kỹ thuật`. Sửa proposal theo nhận xét trước khi code.
+- **Kỹ thuật** — một reviewer khác người viết: người, hoặc một phiên agent riêng (subagent, hoặc phiên chat mới) chỉ được giao proposal + code hiện có và các câu hỏi sau: khả thi không, đúng context không, AC test được không, exception thiếu không, migration an toàn không, có rule nào lẻn vào code mà spec không nói không. Ghi kết luận vào `## Review kỹ thuật` và tên + ngày vào `Người duyệt kỹ thuật`. Sửa proposal theo nhận xét trước khi code. Chưa có ai review được → ghi `chờ`, Status `reviewing`, dừng.
 - **Không ai tự duyệt**: agent viết proposal không đồng thời là reviewer kỹ thuật của nó; người yêu cầu không thay được bước review kỹ thuật (tr.42, 55).
 - **Tiền, quyền truy cập, bảo mật**: AI chỉ nêu phương án + hệ quả; chủ sản phẩm chọn. Chưa chọn → Status `reviewing`, dừng.
 - Chủ sản phẩm nói "cứ làm" (đã giao việc rõ): vẫn viết proposal và vẫn có review kỹ thuật, nhưng không cần chờ duyệt nghiệp vụ lần nữa — ghi `Người duyệt nghiệp vụ: <tên>, <ngày> (giao việc trực tiếp)`. Luật tiền/quyền/bảo mật mới phát sinh trong lúc làm vẫn phải hỏi.

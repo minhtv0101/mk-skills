@@ -27,6 +27,12 @@
 ## Thiết kế
 <File/symbol sẽ đổi, migration (sao lưu dữ liệu thật trước), rủi ro, phần AI làm / phần người quyết.>
 
+## Tự soát
+- Ngày: <YYYY-MM-DD> · audit.py: <kết quả> · verify.py: <kết quả>
+- Đã tự sửa: <mỗi ý một cụm ngắn, hoặc —>
+- Đã hỏi (N câu): <câu hỏi ngắn> → <lựa chọn, ai trả lời>
+- Còn mở: <[OPEN] mới, hoặc —>
+
 ## Review kỹ thuật
 <Tóm tắt nhận xét của người duyệt kỹ thuật (người hoặc reviewer agent) và cách đã xử lý từng ý.>
 

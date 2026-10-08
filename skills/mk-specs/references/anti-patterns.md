@@ -10,6 +10,9 @@ Tổng hợp từ ebook (tr.42, 59–60) và kinh nghiệm vận hành các repo
 | Spec đặc kỹ thuật | Main Flow/AC đầy endpoint, tên hàm, mã lỗi; người nghiệp vụ không đọc nổi | Ngôn ngữ nghiệp vụ ở flow/AC; kỹ thuật vào `- Kỹ thuật:` hoặc `## Traceability`; `audit.py` liệt kê |
 | AI bỏ qua spec | Code có rule spec không nói (ngưỡng, hạn, quyền) | Trả lại: "rule này từ spec nào?" → sửa spec trước hoặc bỏ rule |
 | AI đoán quyết định nghiệp vụ | Giá trị mặc định "hợp lý" tự chọn (thời hạn, phí, quyền) | Dừng, ghi `[OPEN]`, hỏi chủ sản phẩm; tiền/quyền/bảo mật luôn để người quyết |
+| Đoán ý người dùng | Yêu cầu nhiều cách hiểu, agent chọn một rồi viết cả proposal | Liệt kê cách hiểu, hỏi trước; tự soát (review.md) bắt chỗ tự đặt giá trị |
+| Spec phình | UC/AC/entity "phòng khi", cấu hình hoá không ai yêu cầu, exception cho tình huống không xảy ra | Chỉ viết điều yêu cầu cần; ý tưởng thêm → Out of Scope; tự soát nhóm "Thừa" |
+| Sửa lan | Đổi một AC mà viết lại cả UC, đổi định dạng phần lân cận | Chỉ đụng chỗ thay đổi cần; lỗi khác báo hoặc `[OPEN]` |
 | Tự viết, tự duyệt | Proposal không có người duyệt kỹ thuật, hoặc tác giả tự ký | Duyệt hai phía; reviewer agent khác tác giả; ghi tên + ngày |
 | Test tự chứng minh code | Test sinh từ code vừa viết, mock lõi nghiệp vụ | Test từ AC, kiểm hành vi; test đầu tiên của một mẫu do người review kỹ |
 | Spec coverage ảo | Nhiều file spec nhưng AC không có test | Đo AC Coverage + Spec Coverage; `⚠ Chưa có test` phải có lý do |

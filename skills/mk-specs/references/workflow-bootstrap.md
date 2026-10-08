@@ -3,6 +3,7 @@
 ## 1. Cài đặt chung cho mọi project
 
 1. Cài skill vào project: `bash <mk-skills>/install.sh --project <repo>` (đứng trong repo: `--project .`; chạy lại bao nhiêu lần cũng được — thiếu thì thêm, có rồi thì giữ hoặc cập nhật). Lệnh chép skill vào `<repo>/.claude/skills/mk-specs`, tạo `<repo>/specs/mk-specs.yml` từ mẫu nếu chưa có, ghi khối `mk-specs` vào `AGENTS.md` (file chung mọi agent đọc), thêm `@AGENTS.md` vào `CLAUDE.md`, và một dòng trỏ `AGENTS.md` vào `GEMINI.md` nếu file đó có. Agent đọc `.agents/skills` (vd Codex) → thêm `--agents-dir`.
+   Không có `install.sh` (chỉ có thư mục skill, `<skill>` = thư mục chứa `SKILL.md`), làm tay cùng kết quả: chép `<skill>` vào `<repo>/.claude/skills/mk-specs`; chép `assets/mk-specs.yml.template` thành `specs/mk-specs.yml` nếu chưa có; chạy `python3 .claude/skills/mk-specs/scripts/agent-files.py .`.
 2. Sửa `specs/mk-specs.yml`: `contexts`, `ids`, `tests.list_command`, `tests.citation_style` (project mới: cân nhắc `name` hoặc `both`), `metrics.since` = ngày áp dụng.
 3. Tạo khung từ `assets/templates/`: `specs/README.md` (`specs-readme.md`), `business-requirements.md`, `decisions.md` (tiêu đề + bảng mục lục rỗng), `changes/README.md` (một đoạn trỏ tới `.claude/skills/mk-specs/assets/templates/proposal.md`), `changes/archive/`, mỗi context một thư mục với `README.md` + `entities.md`.
 4. Thêm lệnh `specs:gen` / `specs:check` (traceability.md §3).
@@ -18,7 +19,7 @@ Diễn giải theo nhật ký 5 ngày của sách (tr.32–43).
 1. **Inception (BR)** — 60–90 phút với người nghiệp vụ, không bàn DB/UI. Hỏi: hằng ngày đang làm gì; phần nào tốn thời gian nhất; nếu chỉ làm được 3 việc thì là gì; cái gì chắc chắn chưa cần. Kết quả: BR một trang có Goal, Success Metrics, **Out of Scope**.
 2. **Danh mục UC** — AI đề xuất danh sách UC từ BR; người gộp/bỏ. Mỗi UC chỉ là **stub**: ID + tên + một dòng. Commit `docs(BR-01): initial requirement catalog, N use cases`.
 3. **Entity Model sơ bộ** — AI đề xuất, người review cùng phía nghiệp vụ; chỗ cố ý chưa làm ghi vào entity + Out of Scope.
-4. **UC dẫn dắt** — chọn UC nhiều luật nhất, viết đầy đủ (time-box 1–2 giờ), làm mẫu cho các UC còn lại.
+4. **UC dẫn dắt** — chọn UC nhiều luật nhất, viết đầy đủ (time-box 1–2 giờ), làm mẫu cho các UC còn lại. Viết xong BR và UC dẫn dắt → tự soát (`review.md`) trước khi đưa người nghiệp vụ đọc.
 5. **Plan → review plan** — đọc plan của AI trước khi cho code; bắt chỗ trái spec (tr.39).
 6. **Implement theo vòng đời change** (workflow-change.md), review từng commit nhỏ. AI hỏi điều spec chưa nói → sửa spec, không đoán.
 7. **Phản hồi sau demo** — phân loại: đã Out of Scope (ghi BR v2) · bug (fix) · thiếu AC (thêm AC rồi làm) · chỉnh giao diện (tr.40–41).
@@ -61,7 +62,7 @@ Chia bounded context trước, chi tiết sau. Hỏi AI "các module này thuộ
    - **đoán** — có code, chưa ai xác nhận → `implemented` + `[OPEN] cần xác nhận: …` hoặc `⚠ not verified` trên AC;
    - **bí ẩn** — không rõ ai dùng, vì sao tồn tại → Status `legacy-unverified`, thêm đo đạc sử dụng, không đụng một thời gian (sách: 4 tuần), sau đó đề xuất bỏ hoặc tìm người hiểu.
    Mỗi câu trong spec đối chiếu với code; tài liệu cũ nói khác code → `[DIVERGENCE]`, không chọn im lặng.
-3. **Kiểm chứng với nghiệp vụ — hàng đợi cho chủ sản phẩm** — gom `[DIVERGENCE]`/`[OPEN]` ảnh hưởng tiền, quyền, bảo mật, lời hứa BR vào "Hàng đợi quyết định" của `specs/README.md`; đi qua từng context (đọc AC: đúng thực tế không? thiếu case nào? rule "đương nhiên" nào chưa có?). Rule ẩn tìm ra → UC/AC mới **qua change folder**, có owner nghiệp vụ.
+3. **Kiểm chứng với nghiệp vụ — hàng đợi cho chủ sản phẩm** — tự soát (`review.md`) baseline vừa viết trước, rồi gom `[DIVERGENCE]`/`[OPEN]` ảnh hưởng tiền, quyền, bảo mật, lời hứa BR vào "Hàng đợi quyết định" của `specs/README.md`; đi qua từng context (đọc AC: đúng thực tế không? thiếu case nào? rule "đương nhiên" nào chưa có?). Rule ẩn tìm ra → UC/AC mới **qua change folder**, có owner nghiệp vụ.
 4. **Characterization test trước khi refactor** — chụp hành vi hiện tại bằng dữ liệu thật đã ẩn danh (vài chục bản ghi). Loại test này không chứng minh đúng, chỉ chứng minh chưa đổi hành vi (tr.49). Đặt trong thư mục riêng (vd `test/characterization/`).
 5. **Refactor có bảo vệ** — refactor không đổi hành vi; đổi hành vi phải có spec; **một thay đổi không vừa refactor lớn vừa đổi luật**; characterization test + AC test đều xanh. Chạy song song cũ/mới (feature flag) khi rủi ro; lệch thì xem spec + dữ liệu mẫu để quyết bên nào đúng (tr.49–50).
 
