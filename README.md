@@ -27,6 +27,8 @@ Khi AI viết phần lớn code, điều gì không được viết ra thì vớ
 
 ## Cài đặt
 
+Hướng dẫn ngắn từng bước (đưa cho agent tự cài được): [INSTALL.md](INSTALL.md).
+
 Nhanh nhất — không cần tự clone (script clone vào `~/.mk-skills`, đổi bằng biến `MK_SKILLS_HOME`):
 
 ```bash
