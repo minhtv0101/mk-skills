@@ -10,10 +10,11 @@ Bộ skill cho AI coding agent (Claude Code, omp và các agent đọc thư mụ
 
 Skill gồm:
 
-- **Quy trình** cho từng việc: khởi tạo specs (dự án mới hoặc codebase đang chạy), đề xuất thay đổi, thực hiện, hợp nhất, viết commit, kiểm tra, rà soát.
+- **Quy trình** cho từng việc: khởi tạo specs (dự án mới hoặc codebase đang chạy), đề xuất thay đổi, tự soát spec vừa viết, thực hiện, hợp nhất, viết commit, kiểm tra, rà soát.
 - **Mẫu** UC, BR, ADR, proposal, entity, README cho `specs/`.
 - **Scripts** (Python chuẩn, không cần cài thêm gì): sinh `traceability.md` (UC ↔ AC ↔ test) và `open-issues.md` (mọi `[DIVERGENCE]`/`[OPEN]`), kiểm mọi tên test được trích có thật và mọi link mở được, tính chỉ số AC Coverage / Spec Coverage / Trace Ratio, báo cáo vệ sinh spec.
 - **Cổng cứng**: không AC thì không code; luật tiền / quyền truy cập / bảo mật do người quyết, AI chỉ đề xuất; spec không nói thì không đoán; không tự duyệt; commit spec trước code và mọi commit mang ID UC/BR/ADR.
+- **Kỷ luật viết spec** (theo [Karpathy guidelines](https://github.com/multica-ai/andrej-karpathy-skills)): yêu cầu mơ hồ thì hỏi lại trước khi viết; chỉ viết UC/AC được yêu cầu, không thêm thứ "phòng khi"; chỉ sửa đúng chỗ thay đổi cần.
 
 ## Vì sao SDD
 
@@ -126,7 +127,8 @@ Gọi bằng lời thường; agent tự chọn mode.
 | Mode | Làm gì | Ví dụ câu lệnh |
 |---|---|---|
 | `init` | Dựng `specs/` cho dự án mới (BR → UC → AC) hoặc codebase đang chạy (5 bước brownfield) | "Khởi tạo SDD cho repo này theo mk-specs, đây là codebase đang chạy." |
-| `change` | Viết proposal trong `specs/changes/<yyMMdd>-<slug>/`, review hai phía | "Đề xuất thay đổi: mã QR thanh toán hết hạn sau 15 phút thay vì 5." |
+| `change` | Viết proposal trong `specs/changes/<yyMMdd>-<slug>/`, tự soát, review hai phía | "Đề xuất thay đổi: mã QR thanh toán hết hạn sau 15 phút thay vì 5." |
+| `review` | Tự soát spec/proposal vừa viết (tự chạy sau `change`/`init`): tìm mâu thuẫn, thiếu sót, phần thừa, chỗ đoán ý; tự sửa lỗi của mình, hỏi người dùng điểm cần quyết, ghi vào `## Tự soát` | "Soát lại proposal 260131-qr-het-han trước khi gửi duyệt." |
 | `apply` | Test theo AC (đỏ → xanh) rồi code theo proposal đã duyệt | "Làm proposal 260131-qr-het-han đã duyệt." |
 | `merge` | Hợp nhất vào UC/ADR, History có hash, archive, sinh lại file | "Hợp nhất change 260131-qr-het-han vào specs." |
 | `check` | Chạy gen + verify, giải thích lỗi và chỉ số | "Kiểm spec và test có khớp nhau không." |
@@ -142,7 +144,7 @@ mk-skills/
 ├── README.md
 └── skills/mk-specs/
     ├── SKILL.md                 điểm vào: chọn mode, cổng cứng, scripts
-    ├── references/              principles, artifacts, workflow-change, workflow-bootstrap, traceability, anti-patterns
+    ├── references/              principles, artifacts, workflow-change, workflow-bootstrap, review, traceability, anti-patterns
     ├── assets/                  mk-specs.yml.template, templates/ (UC, BR, ADR, proposal, entities, README)
     └── scripts/                 gen.py, verify.py, audit.py, commit-hash.py, mkspecs.py, tests/
 ```
@@ -156,7 +158,9 @@ mk-skills/
 
 ## Ghi công
 
-Tri ân anh **Huy (huynt — [huynt.dev](https://huynt.dev))**, tác giả ebook *Spec Driven Development*. Phương pháp trong `mk-specs` — sáu nguyên tắc, bốn tầng yêu cầu, mẫu UC/BR, quy trình greenfield và brownfield, các chỉ số và anti-pattern — dựa trên cuốn sách này; skill diễn giải lại và ghi số trang để tra cứu, không chép nguyên văn. Cuốn sách tổng hợp từ **AI Unified Process** (Simon Martinelli), **GitHub Spec Kit**, **OpenSpec**, **Domain-Driven Design** và **Hexagonal Architecture**.
+Cảm ơn anh **Huy ([huynt.dev](https://huynt.dev))** với ebook *Spec Driven Development* — phương pháp trong `mk-specs` dựa trên ebook này (skill diễn giải lại, có ghi số trang để tra).
+
+Phần "Kỷ luật khi viết spec" rút từ [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) (MIT).
 
 Phần `mk-specs` thêm vào (đánh dấu ✚ trong references): đánh dấu `[DIVERGENCE]`/`[OPEN]` và luật trọng tài giữa specs/docs/plans, ma trận truy vết sinh tự động và kiểm bằng máy, ADR có phương án bị loại và "Verified in code", History mang hash commit, giới hạn README — rút ra từ việc vận hành SDD trên các dự án thật.
 
@@ -168,8 +172,8 @@ MIT — xem [LICENSE](LICENSE).
 
 ## English
 
-**mk-specs** is an agent skill for Spec-Driven Development. Humans agree on intent in `specs/` (business requirements, use cases, entities, acceptance criteria, ADRs); the AI writes tests and code from the spec; when something is wrong, fix the spec first. It ships workflows (init, change, apply, merge, check, commit, audit), templates, and stdlib-only Python scripts that generate a UC ↔ AC ↔ test traceability matrix and an open-issues list, verify every cited test exists and every relative link resolves, and report AC Coverage, Spec Coverage and Trace Ratio.
+**mk-specs** is an agent skill for Spec-Driven Development. Humans agree on intent in `specs/` (business requirements, use cases, entities, acceptance criteria, ADRs); the AI writes tests and code from the spec; when something is wrong, fix the spec first. It ships workflows (init, change, review, apply, merge, check, commit, audit), templates, and stdlib-only Python scripts that generate a UC ↔ AC ↔ test traceability matrix and an open-issues list, verify every cited test exists and every relative link resolves, and report AC Coverage, Spec Coverage and Trace Ratio. After writing a spec or proposal the agent self-reviews it (`review`): it fixes its own mistakes, asks the user about genuine decision points, and records the result in the proposal. Spec-writing discipline (ask before assuming, nothing speculative, surgical edits) follows the Karpathy guidelines.
 
 Install with `./install.sh --global` (copies to `~/.claude/skills` and `~/.agents/skills`) and/or `./install.sh --project <repo>` (from inside a repo: `--project .`; idempotent — copies to `<repo>/.claude/skills`, creates `specs/mk-specs.yml` if missing, maintains a marked mk-specs block in `AGENTS.md` (the cross-agent standard) and adds `@AGENTS.md` to `CLAUDE.md`, so agents without skill support still follow the workflow; `--agents-dir` also copies to `.agents/skills`). Requirements: bash, python3 ≥ 3.8, git. Skill text is Vietnamese; generated files support `language: vi | en`.
 
-Credits: the method follows the ebook *Spec Driven Development* by Huy (huynt.dev), which builds on AI Unified Process (Simon Martinelli), GitHub Spec Kit, OpenSpec, DDD and Hexagonal Architecture. License: MIT.
+Credits: thanks to Huy (huynt.dev) for the ebook *Spec Driven Development*, which the method follows; spec-writing discipline adapted from [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) (MIT). License: MIT.
