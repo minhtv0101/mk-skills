@@ -4,7 +4,7 @@ description: Spec-Driven Development (SDD) for repos with a specs/ folder - busi
 license: MIT
 metadata:
   author: minhtv0101
-  version: "1.2.0"
+  version: "1.2.1"
 ---
 
 # mk-specs — Spec-Driven Development
@@ -20,8 +20,9 @@ Spec đứng giữa người và AI: người chốt *ý định* trong `specs/`
 3. Kiểm phiên bản (bản project được dùng cho scripts):
    ```bash
    grep -m1 -H 'version:' .claude/skills/mk-specs/SKILL.md ~/.claude/skills/mk-specs/SKILL.md ~/.agents/skills/mk-specs/SKILL.md 2>/dev/null
+   cat ~/.claude/skills/mk-specs/.mk-specs-source ~/.agents/skills/mk-specs/.mk-specs-source 2>/dev/null | head -1
    ```
-   Khác nhau → báo một dòng: "mk-specs project vX, cài chung vY — chạy `install.sh --project .` để cập nhật nếu muốn". Không tự cập nhật.
+   Khác nhau → báo một dòng kèm lệnh cập nhật: `bash <dòng .mk-specs-source>/install.sh --update --global --project .` (kéo bản mới nhất rồi cài cả hai chỗ; không có `.mk-specs-source` → `curl -fsSL https://raw.githubusercontent.com/minhtv0101/mk-skills/main/install.sh | bash -s -- --update --global --project .`). Chỉ chạy khi người dùng đồng ý; sau đó nhắc commit `.claude/skills/mk-specs` (`chore(specs): update mk-specs to vX.Y.Z`).
 4. Xác định mode theo bảng dưới; chỉ đọc reference mode đó cần.
 
 ## Chọn mode

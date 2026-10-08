@@ -27,6 +27,14 @@ Khi AI viết phần lớn code, điều gì không được viết ra thì vớ
 
 ## Cài đặt
 
+Nhanh nhất — không cần tự clone (script clone vào `~/.mk-skills`, đổi bằng biến `MK_SKILLS_HOME`):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/minhtv0101/mk-skills/main/install.sh | bash -s -- --global
+```
+
+Hoặc clone tay:
+
 ```bash
 git clone https://github.com/minhtv0101/mk-skills.git
 cd mk-skills
@@ -40,19 +48,19 @@ cd mk-skills
 
 ```bash
 cd ~/code/my-shop
-bash ~/mk-skills/install.sh --project .    # đường dẫn tới nơi đã clone mk-skills
+bash ~/.mk-skills/install.sh --project .   # hoặc đường dẫn tới nơi đã clone mk-skills
 ```
 
 `--project` làm gì (chạy lại bao nhiêu lần cũng được — **thiếu thì thêm, có rồi thì giữ hoặc cập nhật**):
 
 | File | Lần đầu | Lần sau |
 |---|---|---|
-| `.claude/skills/mk-specs/` | chép skill | thay bằng bản mới (từ chối nếu có sửa tay chưa commit, trừ `--force`) |
+| `.claude/skills/mk-specs/` | chép skill | thay bằng bản mới (từ chối và liệt kê file nếu có sửa tay, trừ `--force`) |
 | `specs/mk-specs.yml` | tạo từ mẫu | giữ nguyên |
 | `AGENTS.md` | tạo, kèm khối `<!-- mk-specs:start … end -->` | chỉ thay phần trong khối khi khối đổi; phần còn lại của file không bị đụng |
 | `CLAUDE.md` | tạo với dòng `@AGENTS.md` (hoặc thêm dòng đó lên đầu file có sẵn) | giữ nguyên |
 | `GEMINI.md` | chỉ khi file đã có: thêm một dòng "Đọc và làm theo `AGENTS.md`" | giữ nguyên |
-| `.agents/skills/mk-specs/` | chỉ với `--agents-dir` (agent đọc `.agents/skills`, vd Codex) | thay bằng bản mới |
+| `.agents/skills/mk-specs/` | chỉ với `--agents-dir` (agent đọc `.agents/skills`, vd Codex) | thay bằng bản mới (tự cập nhật khi thư mục đã có, không cần nhắc lại cờ) |
 
 Không muốn đụng file hướng dẫn agent: thêm `--no-agent-files`.
 
@@ -72,12 +80,16 @@ Khi project dùng `npm`, thêm vào `package.json`:
 
 ## Cập nhật
 
+Một lệnh — kéo bản mới nhất (chỉ fast-forward) rồi cài lại:
+
 ```bash
-cd mk-skills && git pull
-./install.sh --global --project ~/code/my-shop
+bash ~/.mk-skills/install.sh --update                          # chỉ bản cài chung
+bash ~/.mk-skills/install.sh --update --global --project .     # đứng trong project: cả hai
 ```
 
-Rồi trong project: chạy `specs:gen` — `traceability.md`/`open-issues.md` phải không đổi nếu spec không đổi — và commit `.claude/skills/mk-specs` (`chore(specs): update mk-specs to vX.Y.Z`). Agent sẽ cảnh báo khi bản cài chung khác bản trong project.
+Clone ở chỗ khác thì thay `~/.mk-skills` bằng đường dẫn đó (đường dẫn được ghi trong `~/.claude/skills/mk-specs/.mk-specs-source`). Chạy lại bao nhiêu lần cũng được: file đã xoá ở bản mới bị bỏ, `specs/mk-specs.yml` và phần ngoài khối `mk-specs` của `AGENTS.md` giữ nguyên. Bản trong project chỉ bị từ chối khi có file khác với bản `install.sh` đã chép (sửa tay, kể cả đã commit): script liệt kê file đó; luật riêng chuyển sang `AGENTS.md` ngoài khối, rồi chạy lại với `--force`.
+
+Rồi trong project: chạy `specs:gen` — `traceability.md`/`open-issues.md` phải không đổi nếu spec không đổi — và commit `.claude/skills/mk-specs` (`chore(specs): update mk-specs to vX.Y.Z`). Khi mở project, agent so phiên bản bản cài chung với bản trong project; lệch thì báo kèm đúng lệnh cập nhật.
 
 ## Gỡ cài đặt
 
